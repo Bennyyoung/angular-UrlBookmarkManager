@@ -1,0 +1,123 @@
+<div class="col-md-10 mb-2 p-0">
+  <input id="searchBar" [(ngModel)]="term" type="text" class="form-control" placeholder="Search bookmarks...." />
+</div>
+
+<button (click)="showBookmarkForm = !showBookmarkForm" class="btn btn-dark mb-3">Add new bookmark</button>
+<button (click)="viewBookmarks = !viewBookmarks" class="btn btn-danger mb-3">View bookmarks</button>
+<button (click)="favouriteBookmark = !favouriteBookmark" class="btn btn-info mb-3">
+  <i class="fa" [ngClass]="{ 'fa-heart': favouriteBookmark || !favouriteBookmark }"></i>
+</button>
+
+<div class="card card-body mb-3" *ngIf="showBookmarkForm">
+  <app-bookmarkpost [currentBookmark]="currentBookmark" [isEdit]="isEdit"></app-bookmarkpost>
+  <!-- Form to add a new bookmark and edit bookmark -->
+  <form #bookmarkForm="ngForm" (ngSubmit)="onSubmit(bookmarkForm)">
+    <div class="form-group">
+      <label>Name</label><br />
+      <input
+        type="text"
+        [(ngModel)]="bookmark.name"
+        [(ngModel)]="currentBookmark.name"
+        name="name"
+        [ngClass]="{ 'is-invalid': bookmarkName.errors && bookmarkName.touched }"
+        #bookmarkName="ngModel"
+        required
+        minlength="2"
+        class="form-control is-invalid"
+      />
+
+      <div [hidden]="!bookmarkName.errors?.required" class="invalid-feedback">
+        Name is required
+      </div>
+
+      <div [hidden]="!bookmarkName.errors?.minlength" class="invalid-feedback">
+        Must be at least 2 characters
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Label</label><br />
+      <input
+        type="text"
+        [(ngModel)]="bookmark.label"
+        [(ngModel)]="currentBookmark.label"
+        name="label"
+        #bookmarkLabel="ngModel"
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>URL</label><br />
+      <input
+        type="text"
+        [(ngModel)]="bookmark.url"
+        [(ngModel)]="currentBookmark.url"
+        name="url"
+        [ngClass]="{ 'is-invalid': bookmarkUrl.errors && bookmarkUrl.touched }"
+        #bookmarkUrl="ngModel"
+        required
+        minlength="2"
+        class="form-control is-invalid"
+      />
+
+      <div [hidden]="!bookmarkUrl.errors?.required" class="invalid-feedback">
+        URL required
+      </div>
+
+      <div [hidden]="!bookmarkUrl.errors?.minlength" class="invalid-feedback">
+        Must start with http:// or https:// and has at least 2 characters
+      </div>
+    </div>
+
+    <button *ngIf="!isEdit" [disabled]="bookmark.name == '' || bookmark.url == ''" class="btn btn-block mb-3">
+      Add new bookmark
+    </button>
+
+    <button *ngIf="isEdit" (click)="updateBookmark(bookmark)" class="btn btn-warning btn-block mb-3">
+      Update bookmark
+    </button>
+  </form>
+</div>
+
+<!-- Drag and Drop -->
+<div class="card" cdkDropList (cdkDropListDropped)="onDrop($event)" *ngIf="viewBookmarks">
+  <div class="card-body">
+    <div cdkDrag *ngFor="let bookmark of bookmarks | filter: term">
+      <div>
+        <h4>
+          <strong>{{ bookmark.label }}</strong>
+        </h4>
+        <a>{{ bookmark.name | uppercase }} </a>
+
+        <button (click)="removeBookmark(bookmark)" class="btn btn-danger">
+          <i class="fa fa-remove"></i>
+        </button>
+        <button (click)="editBookmark(bookmark)" class="btn btn-light">
+          <i class="fa fa-pencil"></i>
+        </button>
+      </div>
+
+      <button (click)="addFavourite(bookmark)" class="btn btn-info">
+        <i class="fa" [ngClass]="{ 'fa-heart': addFavourite }"> </i>
+      </button>
+
+      <hr />
+    </div>
+  </div>
+</div>
+
+<!-- Add to favourites -->
+<h5>Favourites</h5>
+<div class="card" *ngIf="favouriteBookmark">
+  <div class="card-body">
+    <div *ngFor="let bookmark of bookmarks">
+      <h4>
+        <strong>{{ bookmark.label }}</strong>
+      </h4>
+      <a>{{ bookmark.name | uppercase }} </a>
+      <span>&#10084;</span>
+      <hr />
+    </div>
+  </div>
+</div>
